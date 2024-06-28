@@ -46,10 +46,10 @@ const Home = () => {
       <Hero theme={theme} />
       <CarProduct/>
       <Sectiontwo/>
+      <Sectionlogo/>
       <Sectionthree/>
       <Sectionfre/>
       <Secitonclientsay/>
-      <Sectionlogo/>
       <Sectioninstall/>
       <Sectionquesition/>
       <Footer/>

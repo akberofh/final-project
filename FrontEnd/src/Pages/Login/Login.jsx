@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from './Login.module.css';
 import { useLoginMutation } from "../../Redux/Slice/userApiSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../../Redux/Slice/authSlice";
@@ -18,7 +17,11 @@ const Login = () => {
 
   useEffect(() => {
     if (userInfo) {
-      navigation('/');
+      if (userInfo.userType === 'Admin') {
+        navigation('/admin');
+      } else {
+        navigation('/');
+      }
     }
   }, [navigation, userInfo]);
 
@@ -48,16 +51,18 @@ const Login = () => {
   }
 
   return (
-    <section className={styles.container}>
-      <div className={styles.auth}>
-        <h1>LOGIN</h1>
-        <form onSubmit={handleLogin}>
+    <section className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+        <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="text"
             name="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
           <input
             type="password"
@@ -65,14 +70,20 @@ const Login = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            required
           />
-          {loginError && <div className={styles.error}>{loginError}</div>}
-          <button type="submit" disabled={isLoading || isLoadingLogin}>
-            {isLoading || isLoadingLogin ? 'Login...' : 'Login'}
+          {loginError && <div className="text-red-500 text-sm">{loginError}</div>}
+          <button
+            type="submit"
+            disabled={isLoading || isLoadingLogin}
+            className={`w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-200 ${isLoading || isLoadingLogin ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isLoading || isLoadingLogin ? 'Logging in...' : 'Login'}
           </button>
         </form>
-        <p className={styles.loginmessage} onClick={() => navigation('/register')}>
-          <span>Register</span>
+        <p className="mt-4 text-sm text-gray-600 cursor-pointer text-center" onClick={() => navigation('/register')}>
+          <span>Don't have an account? Register here.</span>
         </p>
       </div>
     </section>

@@ -1,41 +1,68 @@
 import React, { useEffect, useState } from "react";
-import { faTrash, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FaTrash, FaSearch } from 'react-icons/fa'; 
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function AdminHome() {
-  // Setting state
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeUsers, setActiveUsers] = useState([]);
+  const [basketItems, setBasketItems] = useState([]);
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // Yeni eklenen state
+  const navigate = useNavigate();
+  const { userInfo } = useSelector(state => state.auth);
 
   useEffect(() => {
-    allUsers();
+    fetchAllUsers();
+    fetchActiveUsers();
+    fetchBasketItems();
   }, [searchQuery]);
 
-  const allUsers = () => {
+  const fetchAllUsers = () => {
     fetch(`http://localhost:8000/api/users/?search=${encodeURIComponent(searchQuery)}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log(data); // Gelen veriyi konsolda kontrol edin
-        setData(data.allUsers); // State'i güncelle
+        setData(data.allUsers);
       })
       .catch((error) => {
         console.error('Error fetching users:', error);
-        // Hata durumunu konsolda kontrol edebilirsiniz
+        toast.error('Error fetching users');
       });
   };
-  
 
-  // Logout
-  const logOut = () => {
-    window.localStorage.clear();
-    window.location.href = "./login";
+  const fetchActiveUsers = () => {
+    const storedUserInfo = localStorage.getItem('userInfo');
+    if (storedUserInfo) {
+      const userInfo = JSON.parse(storedUserInfo);
+      setActiveUsers([userInfo]);
+    }
   };
 
-  // Deleting user from server and updating local state
+  const fetchBasketItems = () => {
+    const storedBasketList = localStorage.getItem('basketList');
+    if (storedBasketList) {
+      const basketList = JSON.parse(storedBasketList).map(item => ({
+        ...item,
+        userEmail: item.email // user.email yerine userEmail
+      }));
+      setBasketItems(basketList);
+    }
+  };
+
+  const logOut = () => {
+    setIsLoggingOut(true); // Yükleme ekranını göster
+    window.localStorage.clear();
+    setTimeout(() => {
+      navigate('/');
+      window.location.reload(); // Home sayfasına geçerken sayfayı yenile
+    }, 3000);
+  };
+
   const deleteUser = (id, name) => {
     if (window.confirm(`Are you sure you want to delete ${name}?`)) {
-      fetch(`http://localhost:8000/api/users/delete/${id}`, {
+      fetch(`http://localhost:8000/api/users/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -49,93 +76,126 @@ export default function AdminHome() {
         })
         .then((data) => {
           if (data.success) {
-            alert(data.message); // Show the deletion result message
-            setData((prevData) => prevData.filter((user) => user._id !== id)); // Update local state
+            toast.success(data.message);
+            setData((prevData) => prevData.filter((user) => user._id !== id));
           } else {
-            alert("An error occurred while deleting the user.");
+            toast.error("An error occurred while deleting the user.");
           }
         })
         .catch((error) => {
           console.error("Error deleting user:", error);
-          alert("An error occurred while deleting the user.");
+          toast.error("An error occurred while deleting the user.");
         });
     }
   };
 
   const handleSearch = (e) => {
     const value = e.target.value;
-    setSearchQuery(value); // Arama sorgusunu state'e güncelle
+    setSearchQuery(value);
   };
 
-  const { userInfo } = useSelector(state => state.auth);
+  if (isLoggingOut) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-2xl font-semibold">Logout Admin...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="auth-wrapper" style={{ height: "auto", marginTop: 50,display: userInfo.userType === 'Admin' ? 'block' : 'none' }}>
-      <div className="auth-inner" style={{ width: "fit-content" }}>
-        <h3>Welcome Admin</h3>
-        <div style={{ position: "relative", marginBottom: 10 }}>
-          <FontAwesomeIcon
-            icon={faSearch}
-            style={{ position: "absolute", left: 10, top: 13, color: "black" }}
-          />
+    <div className="min-h-screen p-4 bg-gray-100">
+      <div className={`max-w-6xl mx-auto p-6 bg-white rounded shadow-md ${userInfo.userType === 'Admin' ? 'block' : 'hidden'}`}>
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-2xl font-semibold">Welcome Admin</h3>
+          <button
+            onClick={logOut}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200"
+          >
+            Log Out
+          </button>
+        </div>
+        <div className="relative mb-6">
+          <FaSearch className="absolute left-4 top-3 text-gray-500" />
           <input
             type="text"
             placeholder="Search..."
             onChange={handleSearch}
-            style={{
-              padding: "8px 32px 8px 32px",
-              borderRadius: "4px",
-              border: "1px solid #ccc",
-              width: "100%",
-              boxSizing: "border-box",
-            }}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
           />
-          <span
-            style={{ position: "absolute", right: 10, top: 8, color: "#aaa" }}
-          >
+          <span className="absolute right-4 top-3 text-gray-500">
             {searchQuery.length > 0
               ? `Records Found ${data.length}`
               : `Total Records ${data.length}`}
           </span>
         </div>
-        <table style={{ width: 700 }}>
-          <thead>
-            <tr style={{ textAlign: "center" }}>
-              <th>Name</th>
-              <th>Email</th>
-              <th>User Type</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-  {data
-    .filter((user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .map((user) => (
-      <tr key={user._id} style={{ textAlign: "center" }}>
-        <td>{user.name}</td>
-        <td>{user.email}</td>
-        <td>{user.userType}</td>
-        <td>
-          <FontAwesomeIcon
-            icon={faTrash}
-            onClick={() => deleteUser(user._id, user.name)}
-          />
-        </td>
-      </tr>
-    ))}
-</tbody>
-
-        </table>
-
-        <button
-          onClick={logOut}
-          className="btn btn-primary"
-          style={{ marginTop: 10 }}
-        >
-          Log Out
-        </button>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead className="bg-gray-100">
+              <tr className="text-left">
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">User Type</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {data
+                .filter((user) =>
+                  user.name.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map((user) => (
+                  <tr key={user._id} className="text-left">
+                    <td className="px-6 py-4 whitespace-nowrap">{user.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{user.userType}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-4">
+                        <FaTrash
+                          className="cursor-pointer text-red-600 hover:text-red-800"
+                          onClick={() => deleteUser(user._id, user.name)}
+                        />
+                        <button
+                          className={`px-2 py-1 text-xs rounded ${
+                            activeUsers.find(activeUser => activeUser._id === user._id) ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                          }`}
+                        >
+                          {activeUsers.find(activeUser => activeUser._id === user._id) ? 'Active' : 'Inactive'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="overflow-x-auto mt-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Basket Items</h3>
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead className="bg-gray-100">
+              <tr className="text-left">
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">User Email</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Product ID</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Date Added</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {basketItems.map((item) => (
+                <tr key={item.id} className="text-left">
+                  <td className="px-6 py-4 whitespace-nowrap ">{item.userEmail}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.title}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{item.price}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{new Date(item.dateAdded).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className={`${userInfo.userType === 'Admin' ? 'hidden' : 'block'} text-center mt-8`}>
+        <p className="text-gray-500">You are not authorized to view this page.</p>
       </div>
     </div>
   );

@@ -58,6 +58,7 @@ const Detalp = () => {
                 id: note_id,
                 title: product.title,
                 price: product.price,
+                email: userInfo.email,
                 thumbnail: product.thumbnail
             };
 

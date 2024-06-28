@@ -27,7 +27,7 @@ const deleteByIdUser = async (req, res) => {
     const { id } = req.params;
   
     try {
-      const allUsers = await userModel.findOneAndDelete({ _id: id });
+      const allUsers = await User.findOneAndDelete({ _id: id });
       if (!allUsers) {
         return res.status(404).json({ error: "Note not found" });
       }

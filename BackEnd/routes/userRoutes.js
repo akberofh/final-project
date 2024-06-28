@@ -17,7 +17,7 @@ router.post('/register', upload.single('photo'), registerUser);
 router.post('/auth', authUser);
 router.post('/logout', logoutUser);
 router.get('/', getUser);
-router.delete('/delete', deleteByIdUser);
+router.delete('/:id', deleteByIdUser);
 router
     .route('/profile')
     .get(userControlAuth, getUserProfile)

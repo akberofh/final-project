@@ -9,7 +9,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 
 export const Navlinks = [
- 
+
   {
     id: 2,
     name: "BASKET",
@@ -19,7 +19,7 @@ export const Navlinks = [
     id: 2,
     name: "CHAT",
     link: "http://localhost:5173/",
-    target: "_blank" 
+    target: "_blank"
   },
   {
     id: 2,
@@ -27,12 +27,11 @@ export const Navlinks = [
     link: "/dashboard",
   },
   {
-    
+
     id: 2,
     name: "ADMIN",
     link: "/admin",
-    admin: "/admin",
-    
+
   },
   {
     id: 2,
@@ -59,7 +58,7 @@ export const Navlinks = [
 const Header = ({ theme, setTheme }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [user, setUser] = useState(null);
-  
+
   const navigate = useNavigate();
 
   const home = () => {
@@ -104,17 +103,15 @@ const Header = ({ theme, setTheme }) => {
       <div className="container py-2 md:py-0">
         <div className="flex justify-between items-center">
           <div>
-            <span  onClick={home} className="text-3xl font-bold font-serif cursor-pointer">Car Rental</span>
+            <span onClick={home} className="text-3xl font-bold font-serif cursor-pointer">Car Rental</span>
           </div>
           <nav className="hidden md:block">
             <ul className="flex items-center gap-8">
-              {Navlinks.filter(({ name }) => name !== "ADMIN" || (name === "ADMIN" && userInfo.userType === "Admin")).map(({ id, name, link,target ,admin}) => (
+              {Navlinks.filter(({ name }) => name !== "ADMIN" || (name === "ADMIN" && userInfo && userInfo.userType === "Admin")).map(({ id, name, link, target }) => (
                 <li key={id} className="py-4">
                   <a
                     href={link}
                     target={target}
-                    
-                    admin={{display: userInfo.userType === 'Admin' ? 'block' : 'none'}}
                     className="text-lg font-medium hover:text-primary py-2 hover:border-b-2 hover:border-primary transition-colors duration-500"
                   >
                     {name}
@@ -160,11 +157,11 @@ const Header = ({ theme, setTheme }) => {
               />
             )}
           </div>
-          
+
         </div>
       </div>
       <ResponsiveMenu showMenu={showMenu} user={user} />
-       {/* Chat penceresini göstermek için */}
+      {/* Chat penceresini göstermek için */}
     </div>
   );
 };
