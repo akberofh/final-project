@@ -14,6 +14,8 @@ const Register = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [photo, setPhoto] = useState(null);
+    const [userType, setUserType] = useState("");
+    const [secretKey, setSecretKey] = useState("");
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -31,7 +33,16 @@ const Register = () => {
     }, [navigate, userInfo, location.state]);
 
     const handleRegister = async (e) => {
-        e.preventDefault();
+
+        if (userType == "Admin" && secretKey != "ADMIN") {
+            e.preventDefault();
+            alert("Invalid Admin");
+          } else {
+
+              e.preventDefault();
+              
+
+
         if (password !== confirmPassword) {
             toast.error('Passwords do not match');
             return;
@@ -42,6 +53,7 @@ const Register = () => {
             formData.append('name', name);
             formData.append('email', email);
             formData.append('password', password);
+            formData.append('userType', userType);
             if (photo) {
                 formData.append('photo', photo);
             }
@@ -55,6 +67,8 @@ const Register = () => {
         } catch (error) {
             toast.error('Registration failed');
         }
+          }
+
     };
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -81,6 +95,37 @@ const Register = () => {
             <div className="bg-white p-8 rounded shadow-lg w-full sm:w-96">
                 <h1 className="text-2xl font-bold mb-4">REGISTER</h1>
                 <form onSubmit={handleRegister} className="space-y-4">
+                <h3>Register</h3>
+          <div>
+            Register As
+            <input
+              type="radio"
+              name="UserType"
+              value="User"
+              onChange={(e) => setUserType(e.target.value)}
+            />
+            User
+            <input
+              type="radio"
+              name="UserType"
+              value="Admin"
+              onChange={(e) => setUserType(e.target.value)}
+            />
+            Admin
+          </div>
+          {userType == "Admin" ? (
+            <div className="mb-3">
+              <label>Secret Key</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Secret Key"
+                onChange={(e) => setSecretKey(e.target.value)}
+              />
+            </div>
+          ) : null}
+
+
                     <input
                         type="text"
                         name="name"

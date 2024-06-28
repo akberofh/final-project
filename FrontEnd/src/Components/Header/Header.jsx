@@ -6,6 +6,7 @@ import { HiMenuAlt3, HiMenuAlt1 } from "react-icons/hi";
 import ResponsiveMenu from "./ResponsiveMenu";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 export const Navlinks = [
  
@@ -24,6 +25,14 @@ export const Navlinks = [
     id: 2,
     name: "DASHBOARD",
     link: "/dashboard",
+  },
+  {
+    
+    id: 2,
+    name: "ADMIN",
+    link: "/admin",
+    admin: "/admin",
+    
   },
   {
     id: 2,
@@ -61,7 +70,7 @@ const Header = ({ theme, setTheme }) => {
     setShowMenu(!showMenu);
   };
 
- 
+  const { userInfo } = useSelector(state => state.auth);
 
   useEffect(() => {
     const token = localStorage.getItem("token"); // Local storage'dan token'ı alıyoruz
@@ -99,11 +108,13 @@ const Header = ({ theme, setTheme }) => {
           </div>
           <nav className="hidden md:block">
             <ul className="flex items-center gap-8">
-              {Navlinks.map(({ id, name, link,target }) => (
+              {Navlinks.filter(({ name }) => name !== "ADMIN" || (name === "ADMIN" && userInfo.userType === "Admin")).map(({ id, name, link,target ,admin}) => (
                 <li key={id} className="py-4">
                   <a
                     href={link}
                     target={target}
+                    
+                    admin={{display: userInfo.userType === 'Admin' ? 'block' : 'none'}}
                     className="text-lg font-medium hover:text-primary py-2 hover:border-b-2 hover:border-primary transition-colors duration-500"
                   >
                     {name}

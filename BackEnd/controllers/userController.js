@@ -13,6 +13,7 @@ const authUser = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 photo: user.photo,
+                userType: user.userType,
             });
         } else {
             res.status(400).json({ message: 'Email ya da parola hatalı' });
@@ -22,9 +23,24 @@ const authUser = async (req, res) => {
     }
 };
 
+const deleteByIdUser = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      const allUsers = await userModel.findOneAndDelete({ _id: id });
+      if (!allUsers) {
+        return res.status(404).json({ error: "Note not found" });
+      }
+      res.json({ allUsers });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+
 const registerUser = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password ,userType } = req.body;
         let photo = '';
         
         if (req.file) {
@@ -43,6 +59,7 @@ const registerUser = async (req, res) => {
             email,
             password,
             photo,
+            userType,
         });
 
         if (user) {
@@ -52,6 +69,7 @@ const registerUser = async (req, res) => {
                 email: user.email,
                 name: user.name,
                 photo: user.photo,
+                userType: user.userType,
             });
         } else {
             res.status(400).json({ message: "User not added" });
@@ -91,6 +109,7 @@ const getUserProfile = async (req, res) => {
                 name: req.user.name,
                 email: req.user.email,
                 photo: req.user.photo,
+                userType: res.user.userType,
             });
         } else {
             res.status(404).json({ message: 'Kullanıcı Bulunamadı' });
@@ -136,4 +155,5 @@ export {
     getUserProfile,
     updateUserProfile,
     getUser,
+    deleteByIdUser,
 };

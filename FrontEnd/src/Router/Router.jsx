@@ -18,6 +18,7 @@ import AddNewTodo from '../Pages/AddTodo/AddNewTodo'
 import Detailpage from '../Components/CarProductCard/DetalPages.jsx/Detailpage'
 import Basket from '../Pages/Basket/Basket'
 import Payment from '../Pages/Basket/Payment'
+import AdminHome from '../Pages/Register/Adminhome'
 
 const Router = () => {
   return (
@@ -31,6 +32,7 @@ const Router = () => {
         <Route path="/basket/payment" element={<Payment />} />
         <Route path="/product/:note_id" element={<Detailpage />} />
         <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route path="/admin" element={<AdminHome/>}/>
           <Route path="/profile" element={<Profile/>} />
           <Route path="" element={<PrivateRoute/>}  />
           <Route path="/about" element={<AboutCard/>} /> 

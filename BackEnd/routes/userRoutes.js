@@ -6,6 +6,7 @@ import {
     updateUserProfile,
     getUserProfile,
     getUser,
+    deleteByIdUser,
 } from '../controllers/userController.js';
 import { userControlAuth } from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
@@ -16,6 +17,7 @@ router.post('/register', upload.single('photo'), registerUser);
 router.post('/auth', authUser);
 router.post('/logout', logoutUser);
 router.get('/', getUser);
+router.delete('/delete', deleteByIdUser);
 router
     .route('/profile')
     .get(userControlAuth, getUserProfile)

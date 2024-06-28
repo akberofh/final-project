@@ -5,19 +5,20 @@ import { useLoginMutation } from "../../Redux/Slice/userApiSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "../../Redux/Slice/authSlice";
 import { toast } from "react-toastify";
-import 'react-toastify/ReactToastify.css'
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [isLoadingLogin, setIsLoadingLogin] = useState(false); // State for login loading animation
   const navigation = useNavigate();
 
   const { userInfo } = useSelector(state => state.auth);
 
   useEffect(() => {
     if (userInfo) {
-      navigation('/profile');
+      navigation('/');
     }
   }, [navigation, userInfo]);
 
@@ -27,12 +28,22 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoadingLogin(true); // Show loading animation during login process
     try {
       const res = await login({ email, password }).unwrap();
       dispatch(setCredentials({ ...res }));
-      navigation('/profile');
+      setTimeout(() => {
+        if (res.userType === 'Admin') {
+          navigation('/admin');
+        } else {
+          navigation('/');
+        }
+      }, 500);
     } catch (error) {
-      toast.error('Sehv email ya sifre')
+      toast.error('Incorrect email or password');
+      setLoginError('Incorrect email or password'); // Set login error message
+    } finally {
+      setIsLoadingLogin(false); // Hide loading animation after login attempt
     }
   }
 
@@ -56,8 +67,8 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
           {loginError && <div className={styles.error}>{loginError}</div>}
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Logging...' : 'Login'}
+          <button type="submit" disabled={isLoading || isLoadingLogin}>
+            {isLoading || isLoadingLogin ? 'Login...' : 'Login'}
           </button>
         </form>
         <p className={styles.loginmessage} onClick={() => navigation('/register')}>
