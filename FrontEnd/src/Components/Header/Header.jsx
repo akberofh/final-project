@@ -16,6 +16,12 @@ export const Navlinks = [
   },
   {
     id: 2,
+    name: "CHAT",
+    link: "http://localhost:5173/",
+    target: "_blank" 
+  },
+  {
+    id: 2,
     name: "DASHBOARD",
     link: "/dashboard",
   },
@@ -93,10 +99,11 @@ const Header = ({ theme, setTheme }) => {
           </div>
           <nav className="hidden md:block">
             <ul className="flex items-center gap-8">
-              {Navlinks.map(({ id, name, link }) => (
+              {Navlinks.map(({ id, name, link,target }) => (
                 <li key={id} className="py-4">
                   <a
                     href={link}
+                    target={target}
                     className="text-lg font-medium hover:text-primary py-2 hover:border-b-2 hover:border-primary transition-colors duration-500"
                   >
                     {name}

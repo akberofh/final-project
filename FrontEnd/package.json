@@ -33,16 +33,19 @@
     "react-simple-chatbot": "^0.6.1",
     "react-swiper": "^0.1.5",
     "react-toastify": "^10.0.5",
-    "socket.io-client": "^4.7.5", 
+    "socket.io-client": "^4.7.5",
     "swiper": "^11.1.4",
     "toast": "^0.5.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "server": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "vite",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "start": "concurrently \"npm run server rent-a-car\" \"npm run dev ChatApp/front-end\""
   },
   "proxy": "http://localhost:8000",
   "eslintConfig": {
@@ -64,6 +67,7 @@
     ]
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "resolve-url-loader": "^5.0.0",
     "sass": "^1.77.5"
   }
