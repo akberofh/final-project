@@ -1,15 +1,25 @@
 import mongoose from "mongoose";
 
+
 const todoSchema = mongoose.Schema(
   {
     title: {
       type: String,
       required: true,
     },
-    body: {
+    price: {
       type: String,
       required: true,
     },
+    description: {
+      type: String,
+      required: true,
+    },
+    photo: {
+      type: String, // base64 encoded ucun string qebul edir
+      required: true,
+      default: '',
+  },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -1,13 +1,23 @@
 import Todo from "../models/todoModel.js";
+import generateToken from "../utils/generateToken.js";
+
 
 const addUserTodo = async (req, res) => {
   try {
-    const { title, body } = req.body;
+    const { title, description, price } = req.body;
+    let photo = '';
 
+    if (req.file) {
+      photo = req.file.buffer.toString('base64');
+    }
+
+    // Assuming `user` is fetched or defined elsewhere in your middleware
     if (req.user) {
       const todo = await Todo.create({
         title,
-        body,
+        description,
+        price,
+        photo,
         user_id: req.user._id,
       });
 
@@ -20,19 +30,18 @@ const addUserTodo = async (req, res) => {
   }
 };
 
-
 const getUserTodos = async (req, res) => {
-    try {
-      if (req.user) {
-        const userTodos = await Todo.find({ user_id: req.user._id });
-  res.json(userTodos);
-      } else {
-        res.status(404).json({ message: 'User not found' });
-      }
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+  try {
+    if (req.user) {
+      const userTodos = await Todo.find({ user_id: req.user._id });
+      res.status(200).json(userTodos);
+    } else {
+      res.status(404).json({ message: 'User not found' });
     }
-  };
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 
 const deleteUserTodo = async (req, res) => {
@@ -54,4 +63,32 @@ const deleteUserTodo = async (req, res) => {
   }
 };
 
-export { addUserTodo, getUserTodos, deleteUserTodo };
+const updateTodoProfile = async (req, res) => {
+  try {
+    const todo = await Todo.findById(req.params.id);
+
+    if (todo) {
+      todo.title = req.body.title || todo.title;
+      todo.price = req.body.price || todo.price;
+      todo.description = req.body.description || todo.description;
+      todo.photo = req.file ? req.file.buffer.toString('base64') : todo.photo;
+
+      const updatedTodo = await todo.save();
+
+      res.json({
+        _id: updatedTodo._id,
+        title: updatedTodo.title,
+        description: updatedTodo.description,
+        photo: updatedTodo.photo,
+      });
+    } else {
+      res.status(404).json({ message: 'Todo not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+export { addUserTodo, getUserTodos, deleteUserTodo, updateTodoProfile };

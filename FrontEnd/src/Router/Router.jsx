@@ -2,7 +2,6 @@ import React from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Home from '../Pages/Home/Home'
 import Login from '../Pages/Login/Login'
-import Dashboard from '../Pages/Dashboard/Dashboard'
 import Profile from '../Pages/Profile/Profile'
 import PrivateRoute from './PrivateRoute'
 import Register from '../Pages/Register/Register'
@@ -14,11 +13,11 @@ import LadaCatagory from '../Catagory/LadaCatagory'
 import NissanCatagory from '../Catagory/NissanCatagory'
 import ToyotaCatagory from '../Catagory/ToyotaCatagory'
 import MercedesCatagory from '../Catagory/MercedesCatagory'
-import AddNewTodo from '../Pages/AddTodo/AddNewTodo'
 import Detailpage from '../Components/CarProductCard/DetalPages.jsx/Detailpage'
 import Basket from '../Pages/Basket/Basket'
 import Payment from '../Pages/Basket/Payment'
 import AdminHome from '../Pages/Register/Adminhome'
+import CardWish from '../Pages/Wishlist/CardWish'
 
 const Router = () => {
   return (
@@ -26,12 +25,10 @@ const Router = () => {
   <Routes>
     <Route path='/' element={< Home/>} />
     <Route path="/login" element={<Login />} />
-    <Route path="/addtodo" element={<AddNewTodo/>} />
         <Route path="/register" element={<Register />} />
         <Route path="/basket" element={<Basket />} />
         <Route path="/basket/payment" element={<Payment />} />
         <Route path="/product/:note_id" element={<Detailpage />} />
-        <Route path="/dashboard" element={<Dashboard/>}/>
         <Route path="/admin" element={<AdminHome/>}/>
           <Route path="/profile" element={<Profile/>} />
           <Route path="" element={<PrivateRoute/>}  />
@@ -43,6 +40,8 @@ const Router = () => {
           <Route path='/nissan' element={<NissanCatagory/>} />
           <Route path='/toyota' element={<ToyotaCatagory/>} />
           <Route path='/mercedes' element={<MercedesCatagory/>} />
+          <Route path='/carwis' element={<CardWish/>} />
+          
   </Routes>
   </BrowserRouter>
   )

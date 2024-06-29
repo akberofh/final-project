@@ -16,6 +16,13 @@ export const todoApiSlice = apiSlice.injectEndpoints({
         body: todo,
       }),
     }),
+    updateTodo: builder.mutation({
+      query: (todo) => ({
+          url: `${TODOS_URL}/profile`,
+          method: 'PUT',
+          body: todo
+      })
+  }),
     deleteTodo: builder.mutation({
       query: (id) => ({
         url: `${TODOS_URL}/${id}`,
@@ -25,4 +32,4 @@ export const todoApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetTodosQuery, useAddTodoMutation, useDeleteTodoMutation } = todoApiSlice;
+export const { useGetTodosQuery, useAddTodoMutation, useDeleteTodoMutation,useUpdateTodoMutation } = todoApiSlice;

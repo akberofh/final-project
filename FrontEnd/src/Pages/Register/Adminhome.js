@@ -1,18 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { FaTrash, FaSearch } from 'react-icons/fa'; 
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { useAddTodoMutation, useUpdateTodoMutation } from '../../Redux/Slice/todoApiSlice';
 
 export default function AdminHome() {
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeUsers, setActiveUsers] = useState([]);
   const [basketItems, setBasketItems] = useState([]);
-  const [isLoggingOut, setIsLoggingOut] = useState(false); // Yeni eklenen state
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const { userInfo } = useSelector(state => state.auth);
+  const dispatch = useDispatch();
+  const { id } = useParams();
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [photo, setPhoto] = useState(null);
+  const [addTodo, { isError: addError }] = useAddTodoMutation();
+  const [updateTodo, { isError: updateError, isLoading: isUpdating }] = useUpdateTodoMutation();
 
   useEffect(() => {
     fetchAllUsers();
@@ -45,18 +54,18 @@ export default function AdminHome() {
     if (storedBasketList) {
       const basketList = JSON.parse(storedBasketList).map(item => ({
         ...item,
-        userEmail: item.email // user.email yerine userEmail
+        userEmail: item.email
       }));
       setBasketItems(basketList);
     }
   };
 
   const logOut = () => {
-    setIsLoggingOut(true); // Yükleme ekranını göster
+    setIsLoggingOut(true);
     window.localStorage.clear();
     setTimeout(() => {
       navigate('/');
-      window.location.reload(); // Home sayfasına geçerken sayfayı yenile
+      window.location.reload();
     }, 3000);
   };
 
@@ -90,14 +99,43 @@ export default function AdminHome() {
   };
 
   const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('price', price);
+      if (photo) {
+        formData.append('photo', photo);
+      }
+
+      if (id) {
+        const updatedTodo = await updateTodo({ id, formData }).unwrap();
+        dispatch({ type: 'todo/updateTodo', payload: updatedTodo });
+      } else {
+        const newTodo = await addTodo(formData).unwrap();
+        dispatch({ type: 'todo/addTodo', payload: newTodo });
+      }
+      
+      navigate('/carwis');
+    } catch (err) {
+      console.error('Failed to add/update the todo:', err);
+    }
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    setPhoto(file);
   };
 
   if (isLoggingOut) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <p className="text-2xl font-semibold">Logout Admin...</p>
+        <p className="text-2xl font-semibold">Logging Out...</p>
       </div>
     );
   }
@@ -196,6 +234,77 @@ export default function AdminHome() {
       </div>
       <div className={`${userInfo.userType === 'Admin' ? 'hidden' : 'block'} text-center mt-8`}>
         <p className="text-gray-500">You are not authorized to view this page.</p>
+      </div>
+      <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow-md mt-8">
+        <h2 className="text-2xl font-semibold mb-4">{id ? 'Update TODO' : 'Add New TODO'}</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex flex-col">
+            <label htmlFor="title" className="text-sm font-medium">Title:</label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mt-1 p-2 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label htmlFor="price" className="text-sm font-medium">Price:</label>
+            <input
+              type="text"
+              id="price"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="mt-1 p-2 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label htmlFor="description" className="text-sm font-medium">Description:</label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mt-1 p-2 border border-gray-300 rounded"
+            ></textarea>
+          </div>
+          <div className="flex flex-col">
+            <label htmlFor="photo" className="text-sm font-medium">Photo:</label>
+            <input
+              type="file"
+              id="photo"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="mt-1 p-2 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="flex space-x-4">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-200"
+            >
+              {id ? 'Update TODO' : 'Add TODO'}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/carwis')}
+              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition duration-200"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+        {addError && <p className="mt-4 text-red-500">Error adding todo: {addError.message}</p>}
+        {updateError && <p className="mt-4 text-red-500">Error updating todo: {updateError.message}</p>}
+        {id && (
+          <button
+            type="button"
+            className={`w-full py-2 mt-4 bg-green-500 text-white rounded hover:bg-green-600 transition duration-200 ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={handleSubmit}
+            disabled={isUpdating}
+          >
+            {isUpdating ? 'Updating...' : 'Update'}
+          </button>
+        )}
       </div>
     </div>
   );
